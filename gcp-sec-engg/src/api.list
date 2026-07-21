@@ -1,0 +1,28 @@
+#list of API here
+middle # handling
+"compute.googleapis.com"
+"bigquery.googleapis.com"
+"bigquerystorage.googleapis.com"
+"cloudapis.googleapis.com"
+"logging.googleapis.com"
+"monitoring.googleapis.com"
+"servicemanagement.googleapis.com"
+"serviceusage.googleapis.com"
+"sql-component.googleapis.com"
+"storage.googleapis.com"
+"storage-api.googleapis.com"
+"storage-component.googleapis.com"
+"iam.googleapis.com"
+
+# this can be skipped
+"clouddebugger.googleapis.com"
+"cloudtrace.googleapis.com"
+"bigquerymigration.googleapis.com"
+"sourcerepo.googleapis.com"
+"cloudbuild.googleapis.com"
+"cloudfunctions.googleapis.com"
+"containerregistry.googleapis.com"
+"cloudresourcemanager.googleapis.com"
+"pubsub.googleapis.com"
+
+
