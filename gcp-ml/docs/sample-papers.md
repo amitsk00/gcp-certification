@@ -20,8 +20,32 @@
 
 *  Gemini Enterprise Agent Platform supports multiple models or model versions on the same public endpoint and supports traffic splitting among deployed models
 
+* Managed Lustre
+    - Native, POSIX-compliant parallel file system designed for HPC and large AI clusters
+    - Multi-terabytes per second (TB/s) aggregated throughput
+    - Sub-millisecond read/write latency; handles high-concurrency metadata operations with zero jitter.
 
+* for standard numerical and categorical STRING columns with the "least preprocessing effort", relying on BigQuery ML's built-in automatic preprocessing requires zero extra lines of feature transformation code
 
+* TPU VMs as appropriate for SSH command execution and debugging
+
+* `federated learning` is specifically designed for machine learning over decentralized data. A shared model can be distributed to participating clients, training computations can occur against data retained locally by those clients, and model updates can then contribute to improving the shared model without requiring the original training records to be collected into a central repository
+
+* `custom inference routines` are specifically designed for situations where a custom-trained model requires preprocessing or postprocessing but the team wants to avoid writing and maintaining a complete custom serving stack. 
+    - With a custom inference routine, the developer implements the required Python prediction logic, including preprocessing before the scikit-learn model is invoked
+
+* even if we have to mask using DLP, if we need to retain some value and fields are not sensitive, like is_returning_customer, we can leave it as it is, no masking or anything
+
+* PCA (Principal Component Analysis)
+    - PCA relies on calculating variance and a covariance matrix across continuous, **linearly correlated numerical variables**
+    - not applicable when binary or bucketed or 2D/spatial features
+    - PCA is not a de-identification technique
+
+*  Pre Built Vision models
+    - Vertex AI Vision Occupancy Analytics    --> "Video stream" + "Count people in a zone / crossing a line"  
+    - Vertex AI Vision Person/vehicle detector --> detect and count people or vehicles
+
+* word embeddings represent individual words as relatively low-dimensional dense vectors rather than extremely large sparse vectors
 
 ## tips 
 
@@ -35,13 +59,15 @@
 
 * A declining training loss paired with a rising validation loss after epoch 4 is the classic signature of overfitting (high variance)
 
-* Product-defect identification from static images is instead a computer vision problem in which the model needs to recognize visual features such as edges, textures, shapes, cracks, and missing parts
+* underfitting is high bias
+
+* `Product-defect identification` from static images is instead a `computer vision problem` in which the model needs to recognize visual features such as edges, textures, shapes, cracks, and missing parts
 
 * for this binary classification requirement. For binary classification, metrics such as precision, recall, F1 score, AuPRC, and AuROC are more directly relevant.
 
 * execution caching allows Gemini Enterprise Agent Platform Pipelines to reuse the output of a previously completed pipeline step when its cache key matches a previous execution. The cache key considers information such as the step inputs, output definitions, and component specification
 
-* Automatic side-by-side, or AutoSxS, is specifically designed for pairwise model-based evaluation of LLM responses and runs through the Gemini Enterprise Agent Platform evaluation pipeline service
+* `Automatic side-by-side`, or `AutoSxS`, is specifically designed for pairwise model-based evaluation of LLM responses and runs through the Gemini Enterprise Agent Platform evaluation pipeline service
 
 * if cost is a concern, daily training should be avoided, even if data comes daily - unless drift is detected
 
@@ -51,13 +77,45 @@
 
 * regression-based imputation can estimate the missing values of an important numerical feature by learning its relationship with other available features
 
+*  `XRAI` generally performs better on natural images, while `Integrated Gradients` is recommended instead for images from artificial environments such as manufacturing lines, laboratories, diagnostic equipment, and quality-control cameras
 
-which cpu/gpu/tpu for which model
-ResNet model
-which metric for which model
-Managed Lustre
-    Native, POSIX-compliant parallel file system designed for HPC and large AI clusters
-    Multi-terabytes per second (TB/s) aggregated throughput
-    Sub-millisecond read/write latency; handles high-concurrency metadata operations with zero jitter.
+*  ARIMA-based models are intended for forecasting observations indexed over time
+
+* XAI - Aggregation helps identify consistently influential patterns that may not be visible from a handful of individual explanations
+
+* `Experiments` can organize and compare parameters, metrics, and runs, while `Model Registry` manages model resources and model versions
+
+* normalizing numerical features that cover distinctly different ranges because, without scaling, a model can pay disproportionately high attention to features with wider ranges and insufficient attention to features with narrower ranges
+
+* `Class inbalance` -  **Downsample** the data with **upweighting** to create a sample with 10% positive examples
+
+* `Collaborative filtering models`, a core technique in **recommender** systems, predict user preferences by analyzing interactions between users and items, identifying **similar users or items**, and recommending items liked by similar users or the user in question
+
+* handling features: 
+    - One-hot encoding is suitable only for low-cardinality features - typically < 50 to 100 unique values, such as days of the week, device type, or order status
+    - Whenever you see high-cardinality discrete values (IDs, search queries, postal codes, product tags) fed into a DNN / TensorFlow model, the answer almost always involves an Embedding layer (tf.keras.layers.Embedding or tf.feature_column.embedding_column)
+    - If the question specifies a Boosted Trees (XGBoost / LightGBM) or BigQuery ML context, target encoding or frequency encoding might be favored
+
+* Document AI or Speech-to-Text sits in a hybrid tier where you get pre-built architectures that can be adapted or fine-tuned
 
 
+| Workload / Model Characteristic   | Recommended Hardware Platform     |
+|---|---|
+| Scikit-learn / LightGBM / ARIMA   | Compute-Optimized CPU (c2/n2)     |
+| Custom C++ CUDA Kernels / Ops     | Multi-GPU (NVIDIA A100 / L4)      |
+| Low-QPS Real-Time Serving (<50ms) | CPU (n2-standard / c2)            |
+| High-Throughput Real-Time Vision  | GPU (NVIDIA T4 / L4)              |
+| Large Transformer Pretraining     | Cloud TPU Pod (v4/v5e) or A3 GPU  |
+| Irregular Graphs / Dynamic Shapes | GPU (NVIDIA A100)                 |
+| Extreme Batch Size (e.g. 2048+)   | Cloud TPU Pod                     |
+
+
+
+
+
+
+ParameterServerStrategy 
+parentModel in Model Garden/Registry
+ConditionalParameterSpec  - hyperparameter training, whta is conditional hyper params?
+ARIMA models and time series
+Gemini pipeline common components
