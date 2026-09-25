@@ -47,6 +47,8 @@
 
 * word embeddings represent individual words as relatively low-dimensional dense vectors rather than extremely large sparse vectors
 
+* image segmentation assigns image regions or individual pixels to categories, allowing the model to determine the detailed boundaries
+
 ## tips 
 
 * Deep Learning VM Images are optimized for data science and machine learning workloads and include packages such as NumPy, SciPy, and scikit-learn.
@@ -98,6 +100,19 @@
 
 * Document AI or Speech-to-Text sits in a hybrid tier where you get pre-built architectures that can be adapted or fine-tuned
 
+* if needed Py DF/pandas can be used for model if data size is less, needs faster and cheaper outputs
+
+* ARIMA / Forecasting: Predicting an aggregated trend or future metric values sequentially over time - like daily volume per zip code or hourly scans by warehouse etc
+
+* bfloat16 as a standard precision for modern model training because it combines a float32-like dynamic range with approximately half the memory footprint
+
+*  TFRecord is TensorFlow's record-oriented binary format and is well suited to large TensorFlow training datasets. Instead of performing an individual object access for every image, the team can serialize images and their associated labels or metadata into a manageable number of sharded TFRecord files in Cloud Storage
+
+* Core ML is specifically intended for running models on iOS and macOS devices
+
+
+
+
 
 | Workload / Model Characteristic   | Recommended Hardware Platform     |
 |---|---|
@@ -114,8 +129,10 @@
 
 
 
-ParameterServerStrategy 
-parentModel in Model Garden/Registry
-ConditionalParameterSpec  - hyperparameter training, whta is conditional hyper params?
-ARIMA models and time series
-Gemini pipeline common components
+
+
+Try in COnolse
+pipelines
+experiments
+workbench vs colab
+MLMD
