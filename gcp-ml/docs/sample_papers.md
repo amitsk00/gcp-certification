@@ -110,10 +110,6 @@
 
 * Core ML is specifically intended for running models on iOS and macOS devices
 
-
-
-
-
 | Workload / Model Characteristic   | Recommended Hardware Platform     |
 |---|---|
 | Scikit-learn / LightGBM / ARIMA   | Compute-Optimized CPU (c2/n2)     |
@@ -124,14 +120,7 @@
 | Irregular Graphs / Dynamic Shapes | GPU (NVIDIA A100)                 |
 | Extreme Batch Size (e.g. 2048+)   | Cloud TPU Pod                     |
 
-
-
-
-
-
-
-
-Try in COnolse
+Try in Console:
 pipelines
 experiments
 workbench vs colab

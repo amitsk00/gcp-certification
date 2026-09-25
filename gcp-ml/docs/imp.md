@@ -1,5 +1,3 @@
-
-
 Git repo
 
 ```bash
@@ -7,22 +5,12 @@ Git repo
 git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 ```
 
-## ParameterServerStrategy
-* **Architecture:** Dedicated **Parameter Servers** (store and update model variables) + **Workers** (compute gradients and loss).
-* **When to choose (PMLE Exam Cue):**
-  * Model parameters **exceed single GPU/worker memory** (e.g., massive embedding tables in recommendation systems with billions of items/users).
-  * Multi-machine **CPU cluster training** or asynchronous distributed workflows.
-* **Contrast:** `MirroredStrategy` / `MultiWorkerMirroredStrategy` uses synchronous all-reduce and requires the full model to fit into memory on every single accelerator.
 ---
 
 # PMLE Exam High-Yield Study Guide
 
 ---
 
-## parentModel in Model Garden/Registry
-* **Purpose:** Enables **model versioning** under a single logical model resource instead of creating fragmented, unlinked models.
-* **How it works:** When uploading a model artifact (`Model.upload` or `ModelUploadOp`), passing `parent_model="projects/.../models/{model_id}"` registers it as version `v2`, `v3`, etc.
-* **Exam Cue:** Maintaining model lineage, managing aliases (e.g., `default`, `staging`, `production`), side-by-side metric comparison, and clean rollback on deployed endpoints.
 ## 1. Data Preprocessing & Ingestion
 
 ### TF-Transform (TFT) with Apache Beam / Dataflow
@@ -45,13 +33,6 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## ConditionalParameterSpec - hyperparameter training (What are conditional hyperparams?)
-* **Concept:** Hyperparameters that are **only active and tuned conditional upon the value of a parent parameter**.
-* **Real-world Example:**
-  * If `optimizer == "adam"`, tune `beta_1` and `beta_2`.
-  * If `optimizer == "sgd"`, tune `momentum`.
-  * *(Tuning `momentum` when `optimizer == "adam"` is invalid and wastes training budget).*
-* **Exam Cue:** Use `ConditionalParameterSpec` in Vertex AI Vizier to prune invalid search spaces, dramatically reducing trial counts, GPU training time, and cost.
 ## 2. Feature Engineering & Feature Store
 
 ### Vertex AI Feature Store
@@ -68,14 +49,6 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## ARIMA models and time series
-* **Algorithm:** BQML's `ARIMA_PLUS` automated univariate/multivariate time series forecasting.
-* **Built-in Automations (Key Exam Triggers):**
-  * Automatically models **multiple seasonalities** (daily, weekly, yearly).
-  * Accounts for **holiday effects** across different geographic regions.
-  * Automatic **outlier detection and cleaning**, plus **missing data imputation**.
-  * Auto-selects $(p, d, q)$ order without manual grid search.
-* **Scale with `TIME_SERIES_ID_COL`:** Forecast thousands or millions of time series (e.g., SKU sales per store) in a single SQL query in parallel.
 ## 3. Distributed Training & Hardware Selection
 
 ### TensorFlow Distribution Strategies
@@ -97,62 +70,6 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## Gemini / Vertex AI Pipeline Components (All-in-One Ops Directory)
-*Pre-built components from `google_cloud_pipeline_components` (GCPC) and KFP DSL with 1-line descriptions for PMLE:*
-
-### 1. Data Ingestion & Preprocessing
-* `BigQueryQueryJobOp`: Executes a BigQuery SQL query to extract, transform, or prepare datasets.
-* `BigQueryCreateJobOp`: Runs arbitrary BigQuery jobs (queries, loads, copies, extracts) within the pipeline.
-* `BigQueryExtractJobOp`: Exports BigQuery table data directly to Cloud Storage as CSV, Parquet, or Avro.
-* `DataflowPythonJobOp` / `DataflowJobOp`: Launches an Apache Beam pipeline on Dataflow for distributed batch or stream preprocessing.
-* `DataflowFlexTemplateJobOp`: Runs a packaged Dataflow Flex Template from Cloud Storage or Artifact Registry.
-* `DataprocPySparkBatchOp`: Submits a serverless PySpark batch job to Dataproc for massive distributed Spark transformations.
-
-### 2. Feature Store Operations
-* `ImportFeatureValuesOp`: Ingests batch feature updates from BigQuery or GCS into Vertex AI Feature Store.
-* `BatchReadFeatureValuesOp`: Performs point-in-time offline feature lookups ("Time Travel") to construct training data without data leakage.
-
-### 3. Dataset Management
-* `TabularDatasetCreateOp`: Creates a Vertex AI managed Tabular Dataset linked to GCS or BigQuery.
-* `TimeSeriesDatasetCreateOp`: Creates a Vertex AI managed Time Series Dataset for forecasting workflows.
-* `ImageDatasetCreateOp`: Creates a Vertex AI managed Image Dataset for classification or object detection.
-* `TextDatasetCreateOp`: Creates a Vertex AI managed Text Dataset for NLP classification and entity extraction.
-* `DatasetImportDataOp`: Imports new raw data or ground-truth annotations into an existing Vertex AI Dataset.
-* `DatasetExportDataOp`: Exports a Vertex AI Dataset and metadata to Cloud Storage.
-
-### 4. Training & Hyperparameter Tuning
-* `CustomTrainingJobOp`: Runs a custom training script on Vertex AI using Google pre-built framework containers.
-* `CustomContainerTrainingJobOp`: Executes custom training using a fully custom user-built Docker image.
-* `CustomPythonPackageTrainingJobOp`: Installs and runs a custom Python source distribution package for training.
-* `HyperparameterTuningJobRunOp`: Runs Bayesian hyperparameter tuning trials via Vertex AI Vizier.
-* `AutoMLTabularTrainingJobRunOp`: Launches an AutoML training job for tabular classification or regression.
-* `AutoMLImageTrainingJobRunOp`: Launches an AutoML training job for image classification or object detection.
-
-### 5. Model Evaluation & Explainability
-* `ModelEvaluationOp`: Runs an evaluation pipeline against test data to produce metrics, confusion matrices, and ROC curves.
-* `ModelEvaluationClassificationOp`: Computes classification-specific metrics (ROC-AUC, PR-AUC, F1, log-loss).
-* `ModelEvaluationRegressionOp`: Computes regression metrics (RMSE, MAE, R-squared) against test ground truth.
-* `ModelEvaluationSliceOp`: Computes evaluation metrics across user-specified feature slices to detect fairness issues and bias.
-* `ModelEvaluationFeatureAttributionOp`: Computes global and local feature attributions using Vertex Explainable AI (Shapley / Integrated Gradients).
-
-### 6. Model Monitoring & Bias Detection
-* `ModelMonitoringJobOp`: Schedules continuous monitoring on an endpoint to track feature skew and drift against baseline data.
-* `DetectModelDataDriftOp`: Calculates statistical distance (Jensen-Shannon divergence) between production serving features and baseline features.
-* `DetectModelBiasOp`: Audits model prediction parity across protected demographic attributes for responsible AI compliance.
-
-### 7. Model Registry & Deployment
-* `ModelUploadOp`: Registers trained model artifacts into Model Registry (pass `parent_model` parameter for versioning).
-* `ModelGetOp`: Fetches an existing registered model artifact reference by resource name.
-* `EndpointCreateOp`: Provisions a new Vertex AI Endpoint for low-latency online serving.
-* `ModelDeployOp`: Deploys a registered model to an Endpoint with autoscaling, machine type, and `traffic_split` percentages.
-* `ModelBatchPredictOp`: Executes serverless, asynchronous batch predictions on a dataset in GCS or BigQuery without an active endpoint.
-
-### 8. Pipeline Control Flow & Notifications (KFP DSL)
-* `dsl.Condition`: Executes downstream tasks conditionally based on step output (e.g., only deploy if `accuracy > 0.85`).
-* `dsl.ParallelFor`: Executes steps in parallel across dynamic input loops (e.g., training separate models per country/store).
-* `dsl.ExitHandler`: Guarantees execution of cleanup or alerting steps regardless of whether the pipeline succeeded or failed.
-* `dsl.importer`: Ingests an existing external artifact (e.g. pre-existing GCS model weights) into Vertex MLMD lineage tracking.
-* `VertexNotificationEmailOp`: Sends an automated email notification to stakeholders upon pipeline success or failure.
 ## 4. Dataflow for ML Inference (Batch & Streaming)
 
 ### Apache Beam `RunInference` PTransform
@@ -170,8 +87,66 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## BQ - export models or use external models
-## 5. Model Evaluation & Validation
+## 5. Gemini / Vertex AI Pipeline Components (All-in-One Ops Directory)
+*Pre-built components from `google_cloud_pipeline_components` (GCPC) and KFP DSL with 1-line descriptions for PMLE:*
+
+### Data Ingestion & Preprocessing
+* `BigQueryQueryJobOp`: Executes a BigQuery SQL query to extract, transform, or prepare datasets.
+* `BigQueryCreateJobOp`: Runs arbitrary BigQuery jobs (queries, loads, copies, extracts) within the pipeline.
+* `BigQueryExtractJobOp`: Exports BigQuery table data directly to Cloud Storage as CSV, Parquet, or Avro.
+* `DataflowPythonJobOp` / `DataflowJobOp`: Launches an Apache Beam pipeline on Dataflow for distributed batch or stream preprocessing.
+* `DataflowFlexTemplateJobOp`: Runs a packaged Dataflow Flex Template from Cloud Storage or Artifact Registry.
+* `DataprocPySparkBatchOp`: Submits a serverless PySpark batch job to Dataproc for massive distributed Spark transformations.
+
+### Feature Store Operations
+* `ImportFeatureValuesOp`: Ingests batch feature updates from BigQuery or GCS into Vertex AI Feature Store.
+* `BatchReadFeatureValuesOp`: Performs point-in-time offline feature lookups ("Time Travel") to construct training data without data leakage.
+
+### Dataset Management
+* `TabularDatasetCreateOp`: Creates a Vertex AI managed Tabular Dataset linked to GCS or BigQuery.
+* `TimeSeriesDatasetCreateOp`: Creates a Vertex AI managed Time Series Dataset for forecasting workflows.
+* `ImageDatasetCreateOp`: Creates a Vertex AI managed Image Dataset for classification or object detection.
+* `TextDatasetCreateOp`: Creates a Vertex AI managed Text Dataset for NLP classification and entity extraction.
+* `DatasetImportDataOp`: Imports new raw data or ground-truth annotations into an existing Vertex AI Dataset.
+* `DatasetExportDataOp`: Exports a Vertex AI Dataset and metadata to Cloud Storage.
+
+### Training & Hyperparameter Tuning
+* `CustomTrainingJobOp`: Runs a custom training script on Vertex AI using Google pre-built framework containers.
+* `CustomContainerTrainingJobOp`: Executes custom training using a fully custom user-built Docker image.
+* `CustomPythonPackageTrainingJobOp`: Installs and runs a custom Python source distribution package for training.
+* `HyperparameterTuningJobRunOp`: Runs Bayesian hyperparameter tuning trials via Vertex AI Vizier.
+* `AutoMLTabularTrainingJobRunOp`: Launches an AutoML training job for tabular classification or regression.
+* `AutoMLImageTrainingJobRunOp`: Launches an AutoML training job for image classification or object detection.
+
+### Model Evaluation & Explainability
+* `ModelEvaluationOp`: Runs an evaluation pipeline against test data to produce metrics, confusion matrices, and ROC curves.
+* `ModelEvaluationClassificationOp`: Computes classification-specific metrics (ROC-AUC, PR-AUC, F1, log-loss).
+* `ModelEvaluationRegressionOp`: Computes regression metrics (RMSE, MAE, R-squared) against test ground truth.
+* `ModelEvaluationSliceOp`: Computes evaluation metrics across user-specified feature slices to detect fairness issues and bias.
+* `ModelEvaluationFeatureAttributionOp`: Computes global and local feature attributions using Vertex Explainable AI (Shapley / Integrated Gradients).
+
+### Model Monitoring & Bias Detection
+* `ModelMonitoringJobOp`: Schedules continuous monitoring on an endpoint to track feature skew and drift against baseline data.
+* `DetectModelDataDriftOp`: Calculates statistical distance (Jensen-Shannon divergence) between production serving features and baseline features.
+* `DetectModelBiasOp`: Audits model prediction parity across protected demographic attributes for responsible AI compliance.
+
+### Model Registry & Deployment
+* `ModelUploadOp`: Registers trained model artifacts into Model Registry (pass `parent_model` parameter for versioning).
+* `ModelGetOp`: Fetches an existing registered model artifact reference by resource name.
+* `EndpointCreateOp`: Provisions a new Vertex AI Endpoint for low-latency online serving.
+* `ModelDeployOp`: Deploys a registered model to an Endpoint with autoscaling, machine type, and `traffic_split` percentages.
+* `ModelBatchPredictOp`: Executes serverless, asynchronous batch predictions on a dataset in GCS or BigQuery without an active endpoint.
+
+### Pipeline Control Flow & Notifications (KFP DSL)
+* `dsl.Condition`: Executes downstream tasks conditionally based on step output (e.g., only deploy if `accuracy > 0.85`).
+* `dsl.ParallelFor`: Executes steps in parallel across dynamic input loops (e.g., training separate models per country/store).
+* `dsl.ExitHandler`: Guarantees execution of cleanup or alerting steps regardless of whether the pipeline succeeded or failed.
+* `dsl.importer`: Ingests an existing external artifact (e.g. pre-existing GCS model weights) into Vertex MLMD lineage tracking.
+* `VertexNotificationEmailOp`: Sends an automated email notification to stakeholders upon pipeline success or failure.
+
+---
+
+## 6. Model Evaluation & Validation
 
 ### AutoSxS (Automatic Side-by-Side)
 * **What it is:** Pairwise model-based evaluation for LLMs running on Vertex AI.
@@ -188,7 +163,7 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## 6. Model Explainability (Explainable AI / XAI)
+## 7. Model Explainability (Explainable AI / XAI)
 
 ### Feature Attribution Methods
 * **Integrated Gradients:**
@@ -207,7 +182,7 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## 7. Model Serving, Deployment & BigQuery ML
+## 8. Model Serving, Deployment & BigQuery ML
 
 ### Vertex AI Endpoints
 * **Online Serving:** Low-latency predictions with autoscaling, private VPC-SC endpoints, and **traffic splitting** across multiple model versions (canary / blue-green deployments).
@@ -218,14 +193,9 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 * **`EXPORT MODEL` (to GCS):**
   * Exports trained BQML models (TensorFlow SavedModel, XGBoost) to a **Cloud Storage bucket**.
   * **Use Case:** Low-latency (<20ms) real-time online serving on **Vertex AI Endpoints** or mobile/IoT deployment with TF Lite.
-* **External / Remote Models (`REMOTE WITH CONNECTION`):**
+* **Remote Models (`REMOTE WITH CONNECTION`):**
   * Creates a model pointer in BigQuery that points to an external Vertex AI Endpoint or Cloud AI foundation model (Gemini, text-embedding, Cloud Vision) via a **Cloud Resource Connection**.
   * **Use Case:** Run batch predictions, text generation, or embeddings directly in SQL over massive datasets **without exporting data out of BigQuery** or managing batch Python compute.
-  * Exports a trained BQML model (TensorFlow, XGBoost) to a GCS bucket.
-  * **Use Case:** Serve online with low latency on a Vertex AI Endpoint or deploy to edge devices via TF Lite.
-* **Remote Models (`REMOTE WITH CONNECTION`):**
-  * Connects BigQuery to external Vertex AI Endpoints or Cloud AI services (Gemini, text-embeddings, Vision API) via a Cloud Resource Connection.
-  * **Use Case:** Run batch inferences or embeddings in SQL over petabytes of data **without moving data outside BigQuery**.
 
 ### Time Series Forecasting with `ARIMA_PLUS`
 * Fully automated time series algorithm in BQML.
@@ -234,8 +204,9 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 ---
 
-## Fast MLOps Architecture Comparison
-## 8. MLOps Orchestration, Governance & Monitoring
+## 9. MLOps Architecture Comparison & Governance
+
+### Comparison Matrix
 
 | Tool / Service | Core Function | PMLE Exam Cue / Best For |
 |---|---|---|
@@ -244,18 +215,14 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 | **User-Managed Workbench** | Compute Engine VM with JupyterLab | Full root/sudo control, custom Docker images, private VPC-SC, GPU driver customization. |
 | **Colab Enterprise / Managed Workbench** | Serverless notebook environment | Fast start, Google Workspace IAM sharing, real-time team collaboration, Gemini code assist. |
 | **Vertex ML Metadata (MLMD)** | Artifact & Execution Lineage store | Governance, auditing, tracking which exact dataset/commit generated which model version. |
-### Vertex AI Model Registry & `parentModel`
-* **`parentModel` Parameter:** Links an uploaded model as a new version (`v2`, `v3`) under an existing model resource.
-* Manages version aliases (`default`, `prod`, `challenger`) and tracks evaluation metrics over time.
 
-### Google Cloud Pipeline Components (GCPC)
-* Official, pre-built components for Kubeflow / TFX pipelines (`CustomTrainingJobOp`, `ModelUploadOp`, `EndpointCreateOp`, `BigQueryCreateJobOp`).
-* Out-of-the-box support for **Execution Caching** (skips completed steps if inputs and component specs match previous runs).
-
-### Vertex ML Metadata (MLMD)
-* Automatic tracking of artifacts (datasets, models, metrics) and executions (pipeline tasks, training jobs).
-* Enables compliance auditing, full lineage tracking, and reproducibility.
-
-### Model Monitoring (Skew vs. Drift)
-* **Training-Serving Skew:** Discrepancy between the training baseline dataset distribution and incoming production request distribution.
-* **Prediction / Feature Drift:** Statistical distribution shift in live serving features over time (detected using Jensen-Shannon divergence or L-infinity distance against baseline).
+### Model Governance & Monitoring
+* **Vertex AI Model Registry & `parentModel`:**
+  * `parentModel` parameter links an uploaded model as a new version (`v2`, `v3`) under an existing model resource.
+  * Manages version aliases (`default`, `prod`, `challenger`) and tracks evaluation metrics over time.
+* **Vertex ML Metadata (MLMD):**
+  * Automatic tracking of artifacts (datasets, models, metrics) and executions (pipeline tasks, training jobs).
+  * Enables compliance auditing, full lineage tracking, and reproducibility.
+* **Model Monitoring (Skew vs. Drift):**
+  * **Training-Serving Skew:** Discrepancy between the training baseline dataset distribution and incoming production request distribution.
+  * **Prediction / Feature Drift:** Statistical distribution shift in live serving features over time (detected using Jensen-Shannon divergence or L-infinity distance against baseline).
