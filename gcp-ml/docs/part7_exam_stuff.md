@@ -1,4 +1,4 @@
-# Section 7: Generative AI & June 2026 Exam Updates (New Content)
+# Section 7: New Content
 
 ---
 

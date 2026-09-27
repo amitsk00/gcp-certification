@@ -88,7 +88,7 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 ---
 
 ## 5. Gemini / Vertex AI Pipeline Components (All-in-One Ops Directory)
-*Pre-built components from `google_cloud_pipeline_components` (GCPC) and KFP DSL with 1-line descriptions for PMLE:*
+*Pre-built components from `google_cloud_pipeline_components` (GCPC) and KFP DSL with 1-line descriptions:*
 
 ### Data Ingestion & Preprocessing
 * `BigQueryQueryJobOp`: Executes a BigQuery SQL query to extract, transform, or prepare datasets.

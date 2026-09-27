@@ -49,6 +49,12 @@
 
 * image segmentation assigns image regions or individual pixels to categories, allowing the model to determine the detailed boundaries
 
+* `papermill` is a tool for parameterizing and executing notebooks. It is pre-installed in many Vertex AI Notebooks environments
+    ```bash
+    papermill train.ipynb output.ipynb -p output_dir /gcs/my-bucket/model
+    ```
+
+
 ## tips 
 
 * Deep Learning VM Images are optimized for data science and machine learning workloads and include packages such as NumPy, SciPy, and scikit-learn.
@@ -110,18 +116,221 @@
 
 * Core ML is specifically intended for running models on iOS and macOS devices
 
+* increasing the penalty for mistakes on the minority class is a cost-sensitive learning technique that directly addresses class imbalance during model optimization
+
+* `Stratified Sampling` is a sampling method where the entire dataset is first divided into distinct, non-overlapping subgroups called strata (based on a shared characteristic like a class label or categorical feature), and then samples are drawn from each stratum independently - for train and test
+
+* Nested cross-validation is used for robust hyperparameter optimization and bias-reduced generalization estimation
+
+* in case of K-Means, one-hot encoded sparse vector/feature can add problems, so we should take top-N, and for numerical one, standardization is must
+
+---
+
+
+
 | Workload / Model Characteristic   | Recommended Hardware Platform     |
 |---|---|
 | Scikit-learn / LightGBM / ARIMA   | Compute-Optimized CPU (c2/n2)     |
-| Custom C++ CUDA Kernels / Ops     | Multi-GPU (NVIDIA A100 / L4)      |
 | Low-QPS Real-Time Serving (<50ms) | CPU (n2-standard / c2)            |
+| Custom C++ CUDA Kernels / Ops     | Multi-GPU (NVIDIA A100 / L4)      |
 | High-Throughput Real-Time Vision  | GPU (NVIDIA T4 / L4)              |
-| Large Transformer Pretraining     | Cloud TPU Pod (v4/v5e) or A3 GPU  |
 | Irregular Graphs / Dynamic Shapes | GPU (NVIDIA A100)                 |
+| Large Transformer Pretraining     | Cloud TPU Pod (v4/v5e) or A3 GPU  |
 | Extreme Batch Size (e.g. 2048+)   | Cloud TPU Pod                     |
+| high cardinal huge features (wide deep data)   | Cloud TPU Pod |
+|  lower precision accelerators designed for TensorFlow | Clpoud TPU |
+| specify only one worker pool. That worker pool can have only one replica | Cloud TPU | 
+
+---
+
+# Vertex AI Experiment Metrics Reference
+
+| Method | Metric / Artifact Category | Specific Metrics Calculated & Visualized | Description & Purpose |
+| :--- | :--- | :--- | :--- |
+| **`aiplatform.log_metrics`** | **Scalar Classification Metrics** | • Accuracy<br>• Balanced Accuracy<br>• Precision<br>• Recall / Sensitivity<br>• Specificity<br>• F1-Score / $F_{\beta}$ Score<br>• AUC-ROC<br>• Log Loss / Cross-Entropy | Single float values representing overall classification performance across the entire test/validation set. |
+| | **Scalar Regression Metrics** | • Mean Squared Error (MSE)<br>• Root Mean Squared Error (RMSE)<br>• Mean Absolute Error (MAE)<br>• Mean Absolute Percentage Error (MAPE)<br>• $R^2$ Score (Coefficient of Determination)<br>• Explained Variance Score | Evaluates prediction error distance and variance explained for continuous target variables. |
+| | **Scalar Ranking / Recommendation Metrics** | • Mean Reciprocal Rank (MRR)<br>• Normalized Discounted Cumulative Gain (NDCG@K)<br>• Precision@K<br>• Recall@K<br>• Mean Average Precision (MAP) | Measures relevance ranking quality and item placement in recommendation systems. |
+| | **Operational / Efficiency Metrics** | • Training Duration (seconds)<br>• Inference Latency (p50, p95, p99 ms)<br>• Throughput (queries/second)<br>• Total Cost ($) | System performance metrics logged alongside model performance. |
+| **`aiplatform.log_classification_metrics`** | **Confusion Matrix** | • True Positives (TP)<br>• True Negatives (TN)<br>• False Positives (FP)<br>• False Negatives (FN)<br>• Normalized Cell Percentages | Stored as an $N \times N$ 2D array; rendered in Vertex AI Console as an interactive, row/column-normalized heatmap to detect class-level misclassifications. |
+| | **ROC Curve (Receiver Operating Characteristic)** | • False Positive Rate (FPR) per threshold<br>• True Positive Rate (TPR / Recall) per threshold<br>• Decision Threshold Values | Series of $(x, y)$ coordinate pairs across varying confidence cutoffs; visualizes classifier trade-offs and discriminatory power independent of decision threshold. |
+| | **Precision-Recall (PR) Curve** | • Precision values per threshold<br>• Recall values per threshold<br>• Decision Threshold Values | Evaluates classification trade-offs specifically for imbalanced datasets where True Negatives vastly outnumber True Positives. |
+
+---
+
+
+# TensorFlow & TFX Ecosystem Components Reference
+
+| Sequence | Component / Module | Full Name | 1–2 Line Description & Purpose |
+| :---: | :--- | :--- | :--- |
+| **1** | **ExampleGen** | TFX ExampleGen | Ingests raw data from external sources (BigQuery, CSV, TFRecord) and splits it into training/eval sets formatted as `tf.train.Example`. |
+| **2** | **TFDV** | TensorFlow Data Validation | Computes descriptive statistics, infers data schemas, and validates incoming data to detect anomalies, missing values, or schema drift. |
+| **3** | **Transform / TFT** | TensorFlow Transform (`tf.Transform`) | Preprocesses features at scale using Apache Beam and exports the transformation logic as a TensorFlow graph to eliminate training-serving skew. |
+| **4** | **Trainer** | TFX Trainer | Trains the machine learning model using TensorFlow/Keras and outputs SavedModel artifacts for both production serving and evaluation. |
+| **5** | **Tuner** | TFX Tuner (KerasTuner / Vizier) | Automates hyperparameter optimization using algorithms like Bayesian optimization or Hyperband to discover the best model configuration. |
+| **6** | **TFMA / Evaluator** | TensorFlow Model Analysis (TFX Evaluator) | Evaluates model performance across user-defined data slices using Apache Beam and validates metrics against baseline models or thresholds. |
+| **7** | **InfraValidator** | TFX InfraValidator | Deploys the trained model to a sandboxed serving environment to verify it can load and serve predictions without runtime crashes or OOM errors. |
+| **8** | **Pusher** | TFX Pusher | Deploys validated models to their final serving destination, such as Vertex AI Endpoints, TensorFlow Serving clusters, or Cloud Storage buckets. |
+| **9** | **TF Serving / LiteRT** | TensorFlow Serving / LiteRT (TFLite) | High-performance inference runtimes; TF Serving provides low-latency gRPC/REST APIs in the cloud, while LiteRT executes models on mobile and edge devices. |
+| **—** | **MLMD** | ML Metadata | Centralized metadata store that records execution history, lineage, schemas, and input/output artifacts across all pipeline steps. |
+
+
+---
+
+
+# Kubeflow Pipelines (KFP) vs. TensorFlow Extended (TFX)
+
+| Feature | Kubeflow Pipelines (KFP) | TensorFlow Extended (TFX) |
+| :--- | :--- | :--- |
+| **Primary Scope & Nature** | **General-purpose workflow orchestrator** for running containerized steps in a DAG. | **Opinionated, end-to-end MLOps production framework** designed around production ML standards. |
+| **Framework Agnostic vs. Specific** | **Framework-agnostic**: Treats any tool equally (PyTorch, Scikit-learn, TensorFlow, XGBoost, Spark, JAX). | **TensorFlow-centric**: Deeply optimized for TensorFlow, SavedModel, and the broader TF ecosystem. |
+| **Core Architecture & Abstraction** | Any Docker container with inputs/outputs can be a step (`@dsl.component`). | Pre-built, standardized C++ and Python pipeline components (ExampleGen, Transform, Trainer, Evaluator, Pusher). |
+| **Underlying Compute & Execution** | Orchestrates tasks on **Kubernetes (GKE)** or serverless on **Vertex AI Pipelines**. | Orchestrated by KFP, Airflow, or Beam; data-heavy tasks run via **Apache Beam (Cloud Dataflow)**. |
+| **Data Validation & Quality Checks** | Custom logic: Must import third-party libraries (e.g., Great Expectations, custom scripts) into a container. | Native & Automated: **TFDV** detects anomalies, infers schemas, and catches data/schema drift out-of-the-box. |
+| **Feature Preprocessing & Skew** | Manual: Done inside custom steps; developer must ensure train/serving parity manually. | Native: **`tf.Transform`** creates a preprocessing graph stitched into the SavedModel, eliminating training-serving skew. |
+| **Model Evaluation & Slicing** | Manual: Custom metrics code running in a Python component (e.g., standard Scikit-learn metrics). | Native: **TFMA** provides distributed slice-based evaluation, fairness checks, and automated candidate-vs-baseline gating. |
+| **Runtime Container Flexibility** | **Extreme**: Package any custom binary, Bash script, Python environment, or specialized CUDA container. | **Structured**: Uses standardized TFX container templates; customization requires extending base TFX component classes. |
+| **Deployment & Serving Integration** | Flexible: Pusher step can deploy to Triton, KServe, Seldon, Vertex AI, or raw REST APIs. | Built-in: Natively targets **TF Serving**, **LiteRT (TFLite)**, and **Vertex AI Endpoints**. |
+| **Metadata & Lineage Tracking** | Built-in lineage via MLMD (Kubeflow Metadata) or Vertex ML Metadata across pipeline artifacts. | Built-in lineage via **MLMD** natively recording schemas, statistics, transforms, and model evaluations. |
+| **Learning Curve & Customization** | Low barrier to entry: Simple to wrap existing Python functions into pipeline steps. | Steeper learning curve: Requires adhering to TFX schemas, artifact types, and Apache Beam concepts. |
+| **Exam Trigger / Best Use Case** | *"Multi-framework pipelines, custom container workflows, flexible step orchestration on Vertex AI Pipelines."* | *"TensorFlow models, strict production MLOps, automated drift detection, eliminating training-serving skew with `tf.Transform`."* |
+
+
+---
+
+# Global Explainability vs. Local Explainability
+
+| Feature | Global Explainability | Local Explainability |
+| :--- | :--- | :--- |
+| **Core Question Answered** | *"How does the model behave overall across the entire population?"* | *"Why did the model make this specific prediction for this single instance?"* |
+| **Scope of View** | **Macro / Dataset-wide**: Inspects global decision logic, general feature relationships, and overall directional impact. | **Micro / Instance-level**: Inspects the exact feature values of one user, transaction, or image that drove that specific outcome. |
+| **Typical Techniques / Algorithms** | • Global Feature Importance (MDI, Permutation Importance)<br>• Partial Dependence Plots (PDP)<br>• Accumulated Local Effects (ALE)<br>• Mean Absolute SHAP values across all rows | • SHAP values (Shapley Additive exPlanations) for a single row<br>• LIME (Local Interpretable Model-agnostic Explanations)<br>• Integrated Gradients (feature attributions per input)<br>• Saliency Maps / Grad-CAM (for vision) |
+| **Primary Audience & Use Case** | • **Data Scientists & ML Engineers**: Debugging overall bias, feature selection, and sanity-checking global learned patterns.<br>• **Auditors & Regulators**: Validating fairness, governance, and policy compliance before model deployment. | • **End Users & Operators**: Customer support explaining loan denials, fraud analysts investigating an alert, doctors reviewing a diagnostic recommendation.<br>• **Adverse Action Notices**: Generating mandated reason codes (e.g., FCRA/ECOA in banking). |
+| **Concrete Real-World Example (Credit Card Application)** | *"Across all 500,000 applicants, Credit Score and Debt-to-Income (DTI) ratio have the highest overall influence on approvals."* | *"Applicant #48291 was rejected specifically because their DTI ratio was 54% and they had 3 late payments in the last 12 months."* |
+| **Vertex AI Integration** | **Vertex Explainable AI - Model-level Feature Attributions**: Aggregate attribution charts displayed in the Model Registry evaluation tab. | **Vertex Explainable AI - Online Explanations (`predict` with attributions)**: Returns an explanation payload with baseline attributions alongside each real-time prediction score. |
+
+---
+
+# Deep Learning & ML Hyperparameter Reference Guide
+
+### 1. `learning_rate`
+* **What it controls:** The step size taken along the loss gradient vector during weight updates ($w \leftarrow w - \eta \nabla L$).
+* **Typical default / search range:** `1e-5` to `1e-1` (Adam: `1e-4` to `3e-4`; SGD: `1e-2` to `1e-1`; LLM fine-tuning: `1e-5` to `5e-5`).
+* **Compute & latency impact:** No impact on per-step compute time; dictates total training epochs needed for loss convergence.
+* **Common pitfalls & symptoms:** 
+  * *Too high:* Exploding loss, `NaN` values, training instability and divergence.
+  * *Too low:* Premature plateau, excessively slow training, getting trapped in poor local minima.
+* **When & how to tune:** Always tune this first. Use learning rate range tests (LR finder), warmup steps, and schedulers (Cosine Annealing, Linear Decay, or ReduceLROnPlateau).
+
+---
+
+### 2. `clip_grad_norm`
+* **What it controls:** Caps the maximum $L_2$ norm of the gradient vector across all parameters to a threshold $c$ ($g \leftarrow g \cdot \min(1, \frac{c}{\Vert{}g\Vert{}})$).
+* **Typical default / search range:** `0.5` to `5.0` (Standard default: `1.0`).
+* **Compute & latency impact:** Negligible overhead (computes one global reduction vector norm per backward pass).
+* **Common pitfalls & symptoms:** 
+  * *Too low (< 0.1):* Artificially chokes gradient magnitude, severely dragging down learning speed.
+  * *Unset or too high:* Gradient explosions in deep networks, RNNs, and Transformers (`NaN` loss).
+* **When & how to tune:** Essential for Transformers, LLMs, and RNNs. Keep at `1.0` by default; adjust downward to `0.5` if loss exhibits sudden divergence spikes.
+
+---
+
+### 3. `clip_grad_value`
+* **What it controls:** Clips each individual gradient element element-wise into a fixed interval $[-c, c]$ ($g_i \leftarrow \text{clip}(g_i, -c, c)$).
+* **Typical default / search range:** `0.1` to `1.0` (Typically `0.5` or `1.0`).
+* **Compute & latency impact:** Negligible overhead (element-wise clamping during backward pass).
+* **Common pitfalls & symptoms:** Unlike `clip_grad_norm` which preserves vector direction and only scales magnitude, value clipping alters the direction of the gradient vector.
+* **When & how to tune:** Prefer `clip_grad_norm` for Transformer attention blocks; use value clipping when individual outlier gradients dominate specific layers.
+
+---
+
+### 4. `batch_size`
+* **What it controls:** Number of training samples processed in forward and backward passes before updating model weights.
+* **Typical default / search range:** `16` to `2048` (Hardware-constrained; powers of 2: 32, 64, 128, 256).
+* **Compute & latency impact:** Larger batches boost GPU compute saturation and throughput; small batches increase I/O thrashing and per-epoch wall time.
+* **Common pitfalls & symptoms:** 
+  * *Too high:* Generalization gap (converging to sharp minima), GPU Out-Of-Memory (OOM).
+  * *Too low:* High gradient variance, erratic loss trajectory.
+* **When & how to tune:** Scale batch size to maximize GPU memory without OOM. When scaling batch size by a factor of $k$, scale base learning rate linearly ($k \cdot \eta$) or square root ($\sqrt{k} \cdot \eta$).
+
+---
+
+### 5. `weight_decay` ($L_2$ Regularization)
+* **What it controls:** Penalizes large model weights by subtracting a fraction of the weight at each step ($\mathcal{L}_{\text{total}} = \mathcal{L} + \frac{\lambda}{2}\Vert{}w\Vert{}^2$).
+* **Typical default / search range:** `1e-4` to `1e-1` (AdamW: `0.01` to `0.1`; SGD: `1e-4` to `5e-4`).
+* **Compute & latency impact:** Zero compute impact (folded into the parameter update step).
+* **Common pitfalls & symptoms:** 
+  * *Too high:* Underfitting, over-regularized model collapses predictions toward zero.
+  * *Too low:* Overfitting, memorization of noise in the training set.
+* **When & how to tune:** Tune when validation loss diverges from training loss. Use **AdamW** (decoupled weight decay) rather than classical Adam for Transformers and modern CNNs.
+
+---
+
+### 6. `warmup_steps` / `warmup_ratio`
+* **What it controls:** Number of initial training steps where the learning rate linearly ramps from 0 up to the maximum target `learning_rate`.
+* **Typical default / search range:** `500` to `2000` steps, or `0.03` to `0.10` (3%–10% of total training steps).
+* **Compute & latency impact:** No compute impact.
+* **Common pitfalls & symptoms:** Without warmup, high initial learning rates applied to randomized weights destroy pre-trained representations and destabilize layer normalization.
+* **When & how to tune:** Critical for Transformers, AdamW, and fine-tuning pre-trained foundation models. Tune based on total step count.
+
+---
+
+### 7. `momentum` / $\beta_1, \beta_2$
+* **What it controls:** Moving average factors of historical gradients (momentum: $\beta_1 \approx 0.9$) and squared historical gradients (Adam second moment: $\beta_2 \approx 0.999$).
+* **Typical default / search range:** Momentum: `0.9` to `0.99`; Adam: $\beta_1 = 0.9$, $\beta_2 = 0.98$ (Transformers) or $0.999$ (Standard).
+* **Compute & latency impact:** Adds memory footprint for optimizer state tensors (2x model size in RAM for Adam).
+* **Common pitfalls & symptoms:** Setting $\beta_2$ too close to 1.0 causes slow adaptation to changing gradient variance; setting it too low destabilizes step variance.
+* **When & how to tune:** Rarely tuned from defaults; for large-batch Transformer pre-training, tuning $\beta_2 = 0.98$ prevents divergence.
+
+---
+
+### 8. `dropout`
+* **What it controls:** Probability of randomly zeroing out hidden activation units during a forward training pass.
+* **Typical default / search range:** `0.1` to `0.5` (Embedding/attention: `0.1`; Dense layers: `0.2` to `0.5`).
+* **Compute & latency impact:** Very slight kernel overhead; zero memory footprint.
+* **Common pitfalls & symptoms:** 
+  * *Too high:* Model fails to learn sufficient representations (underfitting).
+  * *Too low:* Severe overfitting on small datasets.
+* **When & how to tune:** Tune after learning rate and batch size are locked. If training accuracy reaches 99% while validation plateaus early, increase dropout.
+
+---
+
+### 9. `label_smoothing`
+* **What it controls:** Softens hard one-hot target distributions ($y_k = (1 - \epsilon)y_k + \frac{\epsilon}{K}$).
+* **Typical default / search range:** `0.05` to `0.2` (Standard: `0.1`).
+* **Compute & latency impact:** Negligible compute overhead during cross-entropy loss computation.
+* **Common pitfalls & symptoms:** 
+  * *Too high:* Prevents the model from making confident, correct predictions.
+  * Can hurt calibration if downstream tasks rely strictly on raw softmax probabilities.
+* **When & how to tune:** Use when dealing with noisy labels, high-class-count classification, or overconfident neural networks.
+
+---
+
+### 10. `gradient_accumulation_steps`
+* **What it controls:** Number of forward/backward passes evaluated before calling `optimizer.step()` and `zero_grad()`.
+* **Typical default / search range:** `1` (off) to `16` or `32` (Effective batch size = `per_device_batch_size * gradient_accumulation_steps * num_gpus`).
+* **Compute & latency impact:** No speed improvement; enables large effective batch sizes without incurring GPU VRAM spikes.
+* **Common pitfalls & symptoms:** Miscalculating effective learning rate scaling; forgetting to adjust learning rate schedules according to effective steps.
+* **When & how to tune:** Use when GPU memory cannot fit the desired batch size; trades wall-clock execution time for bypassing the VRAM ceiling.
+
+---
+
 
 Try in Console:
 pipelines
 experiments
 workbench vs colab
 MLMD
+
+give me details, in table for MD file copy, for below and any other important hyperparameter
+clip_grad_norm
+learning rate
+
+
+
+### Important links
+
+Creating Tabular data
+https://docs.cloud.google.com/gemini-enterprise-agent-platform/machine-learning/tabular-data/bp-tabular
+
+GPU TPU details
+https://docs.cloud.google.com/gemini-enterprise-agent-platform/machine-learning/training/configure-compute#gpu-compatibility-table

@@ -625,6 +625,19 @@ results = eval_task.evaluate()
 print(results.summary_metrics)
 ```
 
+* EvalTask options
+    - PointWiseEval
+    - PairWiseEval
+        -  using AutoSxS
+    - Evaluate transalation
+        - BLEU
+        - Coment
+        - MetricX
+    - Evaluate COmputation
+        - ROGUE_L
+        - BLEU
+
+
 #### RAG-Specific Monitoring
 For **Retrieval-Augmented Generation** systems, monitor:
 ```python
