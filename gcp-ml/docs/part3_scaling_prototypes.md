@@ -1,5 +1,4 @@
-# Section 3: Scaling Prototypes into ML Models (~21% of the Exam)
-This is the **largest section** of the exam. Focus on training infrastructure, model selection, hyperparameter tuning, and distributed training.
+# Section 3: Scaling Prototypes into ML Models  
 
 ---
 

@@ -1,4 +1,4 @@
-# Section 4: Serving and Scaling Models (~20% of the Exam)
+# Section 4: Serving and Scaling Models  
 
 ---
 

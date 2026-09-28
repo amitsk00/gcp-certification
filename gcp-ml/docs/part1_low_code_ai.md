@@ -39,11 +39,16 @@ AutoML automates the process of training high-quality models with minimal ML exp
 - **Image**: Classification, object detection
 - **Text**: Classification, entity extraction, sentiment analysis
 - **Video**: Classification, object tracking, action recognition
-**When to choose AutoML over BigQuery ML:**
-- You have image, video, or text data (BigQuery ML is primarily tabular)
-- You want Vertex AI ecosystem integration (pipelines, monitoring, endpoints)
-- You need higher accuracy than SQL-based models offer
-> **Tip for exam:** BigQuery ML = SQL interface, stays in BigQuery. AutoML = no-code GUI, broader data types, lives in Vertex AI / Agent Platform.
+
+
+* When to choose AutoML over BigQuery ML:
+  - You have image, video, or text data (BigQuery ML is primarily tabular)
+  - You want Vertex AI ecosystem integration (pipelines, monitoring, endpoints)
+  - You need higher accuracy than SQL-based models offer
+
+> **Tip for exam:**  
+BigQuery ML = SQL interface, stays in BigQuery. 
+AutoML = no-code GUI, broader data types, lives in Vertex AI / Agent Platform.    
 📖 [BigQuery ML docs](https://cloud.google.com/bigquery/docs/bqml-introduction)
 📖 [AutoML on Vertex AI](https://cloud.google.com/vertex-ai/docs/beginner/beginners-guide)
 ---
@@ -91,7 +96,20 @@ After training, inspect feature importance:
 SELECT * FROM ML.FEATURE_INFO(MODEL `my_project.dataset.model`);
 ```
 📖 [BigQuery ML preprocessing](https://cloud.google.com/bigquery/docs/bigqueryml-transform)
+
 ---
+
+### Remote BQ models
+
+```sql
+CREATE OR REPLACE MODEL `project.dataset.vertex_remote_model`
+  INPUT (image_bytes BYTES)
+  OUTPUT (label STRING, score FLOAT64)
+  REMOTE WITH CONNECTION `projects/my-project/locations/us-central1/connections/bq-vertex-conn`
+  OPTIONS (
+    ENDPOINT = 'https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_NUMBER/locations/us-central1/endpoints/ENDPOINT_ID'
+);
+```
 
 ### Generating Predictions Using BigQuery ML
 Three types of prediction functions:
@@ -126,6 +144,8 @@ Steps to train an AutoML model on Vertex AI:
 3. **Train** — Vertex AI handles splitting, hyperparameter search, ensembling
 4. **Evaluate** — review confusion matrix, AUC-ROC, feature importance in the console
 5. **Deploy** — one-click deploy to an endpoint for online prediction
+
+
 **Key AutoML settings to know:**
 | Setting | Notes |
 |---|---|
@@ -170,6 +190,9 @@ FROM `my_dataset.training_examples`;
 | Video generation/understanding | Veo |
 | Open-source flexibility | Llama 3, Mistral, Gemma |
 | Embeddings | text-embedding-004 |
+
+---
+
 **Key model selection criteria:**
 - **Latency** — Flash models are faster; Pro models are more capable
 - **Context window** — Gemini 1.5 Pro supports up to 1M tokens
@@ -219,43 +242,53 @@ client = translate.Client()
 result = client.translate("Hello, world!", target_language="es")
 print(result["translatedText"])  # "¡Hola, mundo!"
 ```
-**Other notable APIs:** Speech-to-Text, Text-to-Speech, Natural Language API, Video Intelligence API
+
+Other notable APIs:  
+Speech-to-Text, Text-to-Speech, Natural Language API, Video Intelligence API
 📖 [Document AI](https://cloud.google.com/document-ai/docs) | [Vision API](https://cloud.google.com/vision/docs) | [Translate API](https://cloud.google.com/translate/docs)
+
 ---
 
 ### Building Solutions and Tuning Models for Specific Use Cases
 
 #### Gemini (Text, Multimodal)
-```python
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part
-vertexai.init(project="my-project", location="us-central1")
-model = GenerativeModel("gemini-1.5-pro")
 
-# Multimodal: image + text
-image_part = Part.from_uri("gs://my-bucket/chart.png", mime_type="image/png")
-response = model.generate_content(["Describe this chart:", image_part])
-print(response.text)
-```
+  ```python
+  import vertexai
+  from vertexai.generative_models import GenerativeModel, Part
+  vertexai.init(project="my-project", location="us-central1")
+  model = GenerativeModel("gemini-1.5-pro")
+
+  # Multimodal: image + text
+  image_part = Part.from_uri("gs://my-bucket/chart.png", mime_type="image/png")
+  response = model.generate_content(["Describe this chart:", image_part])
+  print(response.text)
+  ```
 
 #### Imagen (Image Generation)
-```python
-from vertexai.preview.vision_models import ImageGenerationModel
-model = ImageGenerationModel.from_pretrained("imagegeneration@006")
-images = model.generate_images(
-    prompt="A futuristic city skyline at sunset, photorealistic",
-    number_of_images=1,
-    aspect_ratio="16:9"
-)
-images[0].save("output.png")
+
+  ```python
+  from vertexai.preview.vision_models import ImageGenerationModel
+  model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+  images = model.generate_images(
+      prompt="A futuristic city skyline at sunset, photorealistic",
+      number_of_images=1,
+      aspect_ratio="16:9"
+  )
+  images[0].save("output.png")
+
 ```
 
 #### Veo (Video Generation)
-Veo generates high-quality video clips from text or image prompts. Accessed via Vertex AI API or the console.
+
+Veo generate  Vertex AI API or the console.
+
 
 #### Models as a Service (MaaS)
-Open-source models (Llama, Mistral, Gemma) served via Model Garden without managing infrastructure — pay per token, no GPU provisioning needed.
-📖 [Gemini API on Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/overview)
+
+  Open-source models (Llama, Mistral, Gemma) served via Model Garden without managing infrastructure — pay per token, no GPU provisioning needed.
+  📖 [Gemini API on Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/overview)
+
 ---
 
 ### Optimizing Gemini-Based Applications for Cost, Latency, and Availability

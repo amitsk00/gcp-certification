@@ -14,7 +14,7 @@ ACE is an advancement of TCAV that aims to automate the discovery of concepts. [
 
 ### Feature Attribution Explainability
 
-#### XRAI (eXplainable Region-based Artificial Intelligence)
+#### XRAI (eXplanation with Ranked Area Integrals)
 XRAI is a feature attribution method specifically for image models that improves upon earlier techniques like Integrated Gradients. [5, 6] It identifies regions of an image that contribute to a given prediction. [5] XRAI first segments the image into areas and then runs an attribution method (like Integrated Gradients) to determine the importance of each region, resulting in saliency maps (heatmaps) that are often more coherent and easier to interpret than pixel-based methods. [5, 6]
 
 *   **GCP Context:** XRAI is one of the attribution methods available in **Vertex Explainable AI**. [6] You can request an XRAI explanation when deploying a custom image model to a Vertex AI Endpoint.

@@ -1,4 +1,4 @@
-# Section 5: Automating and Orchestrating ML Pipelines (~18% of the Exam)
+# Section 5: Automating and Orchestrating ML Pipelines 
 
 ---
 

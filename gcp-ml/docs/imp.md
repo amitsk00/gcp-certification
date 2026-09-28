@@ -1,3 +1,5 @@
+# Quick Tips
+
 Git repo
 
 ```bash
@@ -169,7 +171,8 @@ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 * **Integrated Gradients:**
   * Computes path integrals along gradients from a baseline to the input.
   * **Best For:** Differentiable neural networks on structured/tabular data, text, and **artificial/industrial images** (manufacturing defect lines, laboratory diagnostics).
-* **XRAI (eXplainable Region-based AI):**
+
+* **XRAI (eXplanation with Ranked Area Integrals):**
   * Segments images into super-pixels/regions and attributes importance to whole visual regions.
   * **Best For:** **Natural images** (identifying animals, everyday consumer objects).
 * **Sampled Shapley:**

@@ -12,7 +12,7 @@
 - Try **prompt + context engineering first** — cheapest, no training, instant iteration.
 - Move to **tuning** only when prompting plateaus on a consistent, narrow task.
 
-> **Exam Q:** *A team gets inconsistent output formats from Gemini despite detailed
+> Q -  *A team gets inconsistent output formats from Gemini despite detailed
 > prompts, on a fixed classification task with 5k labeled examples. Cheapest reliable fix?*
 > → **Supervised fine-tuning**, not a bigger model or more prompt tokens. A stable
 > narrow task + labeled data is the textbook tuning signal.
@@ -33,7 +33,7 @@
 - Vertex tuning produces a **new tuned model version** registered like any other — same deploy/monitor path as Section 4.
 - Tuning is **PEFT/adapter-based**, not full-weight retraining — that's why it's affordable.
 
-> **Exam Q:** *You need Gemini-Pro-level answers but at Flash cost for 10M calls/day. Approach?*
+> **Q:** *You need Gemini-Pro-level answers but at Flash cost for 10M calls/day. Approach?*
 > → **Distill** Pro into a smaller model (or tuned Flash). Preference tuning fixes tone,
 > not cost; a bigger model worsens cost.
 
@@ -51,7 +51,7 @@ Framed as a **retrieval + model** pipeline — not an agent.
 - Behavior/format/style is the gap → **tuning**, not RAG.
 - Both wrong facts *and* wrong format → RAG **and** tuning are complementary.
 
-> **Exam Q:** *An internal Q&A bot must answer from policy docs updated weekly and cite them.
+> **Q:** *An internal Q&A bot must answer from policy docs updated weekly and cite them.
 > Fine-tune or RAG?*
 > → **RAG** — weekly-changing facts + citation requirement. Fine-tuning bakes in stale
 > facts and can't cite.
@@ -65,7 +65,7 @@ Foundational concepts now explicitly in scope:
 - **System instructions** — pin role, constraints, and output schema (e.g., "return JSON").
 - **Context window management** — relevant retrieved context beats dumping everything; irrelevant filler degrades quality and cost.
 
-> **Exam Q:** *Model does arithmetic-heavy reasoning wrong. No training budget. First lever?*
+> **Q:** *Model does arithmetic-heavy reasoning wrong. No training budget. First lever?*
 > → **Chain-of-thought prompting.** Free, immediate, targets multi-step reasoning.
 
 ---
@@ -78,7 +78,7 @@ Gen-AI outputs are open-ended — classic accuracy/F1 don't fit.
 - **Vertex AI Evaluation service**: built-in SDK combining computed + model-judged metrics.
 - **Groundedness** is the key RAG metric — is every claim supported by retrieved context?
 
-> **Exam Q:** *How to evaluate a summarizer's quality across 50k docs with no human raters?*
+> **Q:** *How to evaluate a summarizer's quality across 50k docs with no human raters?*
 > → **LLM-as-a-judge** (via Vertex AI Evaluation). ROUGE alone needs reference summaries;
 > human review doesn't scale.
 
@@ -91,7 +91,7 @@ Gen-AI outputs are open-ended — classic accuracy/F1 don't fit.
 - **Fairness** — audit per demographic group; disparate-impact ratio **< 0.8** flags concern.
 - **Transparency** — Model Cards document intended use, limits, and training data.
 
-> **Exam Q:** *A gen-AI app risks leaking customer PII into prompts sent to Gemini. Control?*
+> **Q:** *A gen-AI app risks leaking customer PII into prompts sent to Gemini. Control?*
 > → **Cloud DLP** to redact PII pre-inference. Safety filters block harmful content, not PII.
 
 ---

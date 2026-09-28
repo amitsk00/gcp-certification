@@ -1,4 +1,4 @@
-# Section 2: Collaborating Within and Across Teams to Manage Data and Models (~16% of the Exam)
+# Section 2: Collaborating Within and Across Teams to Manage Data and Models  
 
 ---
 
@@ -127,7 +127,7 @@ def preprocessing_fn(inputs):
 | Feature Group | A logical collection of features (backed by a BigQuery table) |
 | Feature | An individual feature column |
 | Feature View | A materialized view for online serving |
-| Online Store | Low-latency key-value store for real-time feature lookup |
+| Online Store | Low-latency key-value store (BigTable based\) for real-time feature lookup |
 
 #### Workflow
 ```python
@@ -194,19 +194,12 @@ When you build a training set, each label has a timestamp. You must join **only 
 - One-off model, features used by nobody else, no online serving → a plain BigQuery table is simpler and cheaper.
 - Feature needed only at training time (never at low-latency serving) → offline/BQ is enough; the online store adds cost for no benefit.
 
-> **Exam Q:** *Your model scores well offline but degrades badly in production, and you built the
 
-> training set with a manual SQL join of features to labels. Likely cause?*
+---
 
-> → **Label leakage from missing point-in-time correctness** — the join pulled feature values
+> Your model scores well offline but degrades badly in production, and you built the  training set with a manual SQL join of features to labels. Likely cause? → **Label leakage from missing point-in-time correctness** — the join pulled feature values computed after the label timestamp. Use Feature Store's point-in-time lookup (or filter on  `feature_timestamp <= label_timestamp`).
 
-> computed after the label timestamp. Use Feature Store's point-in-time lookup (or filter on
-
-> `feature_timestamp <= label_timestamp`).
-
-> **Exam Q:** *Real-time predictions need feature lookups under 10ms by entity key. Which store?*
-
-> → **Online store** (Feature View materialized to the online store), not a BigQuery query.
+> Real-time predictions need feature lookups under 10ms by entity key. Which store?  → **Online store** (Feature View materialized to the online store), not a BigQuery query.
 
 📖 [Vertex AI Feature Store](https://cloud.google.com/vertex-ai/docs/featurestore/overview)
 📖 [Point-in-time lookups](https://cloud.google.com/vertex-ai/docs/featurestore/latest/serving-batch)
@@ -494,8 +487,10 @@ print(model.gca_resource.training_pipeline)  # which pipeline created this model
 ## Key Exam Tips for Section 2
 - **Feature Store** = solve training-serving skew; share features across teams
 - **Dataflow** = large-scale preprocessing with consistent logic for train and serve
+    - TF Transform always uses Beam, so Fataflow is best choise
 - **BigQuery SQL** = easiest for tabular transformations at scale
 - **DLP** = detect and redact PII before training
+    - if some column isnt sensitive , can be kept without DLP
 - **Workbench** = persistent VM; **Colab Enterprise** = serverless, auto-shutdown
 - **LLM-as-a-judge** = automated eval for generative outputs when ground truth exists
 - **ML Metadata** = tracks lineage (dataset → model → endpoint) automatically

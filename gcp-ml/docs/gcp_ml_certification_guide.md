@@ -174,9 +174,3 @@ Models degrade over time. Monitoring ensures your AI solutions remain safe, fair
 *Answer & Feedback:* **Concept Drift**. The underlying relationship between the features and the target variable (demand) has fundamentally shifted. You must trigger a retraining pipeline with fresh data.
 
 ---
-**Next Steps:**
-1. Setup a Google Cloud Free Tier account.
-2. Run through the "Vertex AI Pipelines" Qwiklabs.
-3. Review the Google Cloud Documentation on "Model Monitoring" and "BigQuery ML".
-
-Good luck on your Q3 exam!

@@ -1,4 +1,4 @@
-# Section 6: Monitoring AI Solutions (~13% of the Exam)
+# Section 6: Monitoring AI Solutions 
 
 ---
 
@@ -104,6 +104,7 @@ if response.candidates[0].finish_reason.name == "SAFETY":
 - Sensitive data leak prevention
 - Jailbreak attempt detection
 - Output sanitization
+- DLP for PII
 
 ```python
 # Model Armor sits between your app and the LLM
@@ -327,15 +328,18 @@ for explanation in response.explanations:
 | Sampled Shapley | Any black-box | Model-agnostic, slower |
 | SHAP (TreeSHAP) | Tree models | Exact and fast for XGBoost/GBM |
 
-**How to pick (exam shortcut):** differentiable model (neural net) → **Integrated Gradients**; images → **XRAI**; tree ensemble (XGBoost/GBM/Random Forest) → **TreeSHAP** (exact + fast); anything else / true black box → **Sampled Shapley** (works everywhere, just slower).
 
-> **Exam Q:** *You need per-prediction feature attributions for a deployed XGBoost model and
+**How to pick (exam shortcut):**
 
-> want them fast and exact. Which method?*
+    - differentiable model (neural net) → **Integrated Gradients**; 
+    - images → **XRAI**; 
+    - tree ensemble (XGBoost/GBM/Random Forest) → **TreeSHAP** (exact + fast); 
+    - anything else / true black box → **Sampled Shapley** (works everywhere, just slower).
 
-> → **TreeSHAP.** Integrated Gradients needs a differentiable model; Sampled Shapley works
 
-> but is an unnecessary approximation for trees.
+
+
+> *You need per-prediction feature attributions for a deployed XGBoost model and want them fast and exact. Which method?* → **TreeSHAP.** Integrated Gradients needs a differentiable model; Sampled Shapley works  but is an unnecessary approximation for trees.
 
 #### Shapley & Gradient Techniques — Exam Prep Deep Dive
 **Integrated Gradients — how it works:**
@@ -358,7 +362,7 @@ for explanation in response.explanations:
 
 **TreeSHAP:**
 - Exact Shapley for tree-based models (XGBoost, LightGBM, Random Forest, GBM)
-- O(TLD²) complexity vs. exponential for brute-force Shapley — dramatically faster
+- O(TLD²) complexity vs. exponential for brute-force Shapley — ***dramatically faster***
 - Not applicable to neural networks
 
 **XRAI (eXplanation with Ranked Area Insertions):**
